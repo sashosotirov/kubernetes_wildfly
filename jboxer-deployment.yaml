@@ -37,8 +37,10 @@ spec:
                 key: password
         
         ports:
-        - containerPort: 80                
+        - containerPort: 80
+                         
         - containerPort: 443
+          
                        
 
         readinessProbe:
