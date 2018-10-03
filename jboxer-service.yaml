@@ -1,0 +1,19 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: jboxer-service
+spec:
+  selector:
+    app: jboxer
+  ports:
+  - name: http
+    protocol: TCP
+    port: 80
+    targetPort: 8080
+  - name: https
+    protocol: TCP
+    port: 443
+    targetPort: 9990
+  type: LoadBalancer
+  sessionAffinity: ClientIP
+  externalTrafficPolicy: Local

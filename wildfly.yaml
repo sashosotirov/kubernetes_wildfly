@@ -1,0 +1,37 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: wildfly
+spec:
+  replicas: 2
+  template:
+    matadata:
+      labels:
+        app: wildfly
+
+    spec:
+    containers:
+      - name: wildfly
+        image: sashosot/wildfly:14.0
+        env:
+          - name: WILDFLY_USER
+            valueFrom:
+              secretKeyRef:
+                name: logtext
+                key: username
+          - name: WILDFLY_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: logtext
+                key: password
+    volumeMounts:
+    - name: key-volume
+      mountPath: /opt/certificate/javakeystore.jks
+      readOnly: true
+    volumes:
+    - name: key-volume
+      secret:
+        secretName: keyfile
+    
+ 
+

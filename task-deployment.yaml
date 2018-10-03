@@ -1,0 +1,95 @@
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: jboxer
+
+---
+
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: jboxer
+  name: jboxer
+  namespace: jboxer
+
+  selector:
+    matchLabels:
+      app: jboxer
+
+  replicas: 2
+
+  template:
+    metadata:
+      labels:
+        app: jboxer
+    spec:
+      volumes:
+      - name: key-volume
+        secret:
+          secretName: keyfile
+
+      containers:
+      - name: jboxer
+        image: sashosot/wildfly:14.0
+        
+        env:
+          name: WILDFLY_USER
+          valueFrom:
+            secretKeyRef:
+              name: logtext
+              key: username
+          name: WILDFLY_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: logtext
+              key: password
+        
+        ports:
+        - containerPort: 8080
+          hostPort: 8080
+          name: http
+          protocol: TCP
+        - containerPort: 8443
+          hostPort: 8443
+          name: https
+          protocol: TCP
+       
+        readinessProbe:
+          failureThreshold: 2
+          httpGet:
+            httpHeaders:
+            - name: Host
+              value: localhost
+            path: /__trafficserver_alive
+            port: http
+            scheme: HTTP
+          initialDelaySeconds: 5
+          periodSeconds: 3
+          successThreshold: 1
+          timeoutSeconds: 10
+
+        
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: jboxer
+  namespace: jboxer
+spec:
+  type: NodePort
+  ports:
+  - name: http
+    port: 8080
+    protocol: TCP
+    targetPort: 8080
+    nodePort: 30080
+  - name: https
+    port: 8443
+    protocol: TCP
+    targetPort: 8443
+    nodePort: 30443
+

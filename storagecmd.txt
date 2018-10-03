@@ -1,0 +1,2 @@
+kubectl create secret generic keyfile --from-file=sslkey=./javakeystore.jks
+kubectl create secret generic logtext --from-literal=username=username1 --from-literal=password=password1

@@ -1,0 +1,59 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels: 
+    app: jboxer
+  name: jboxer
+  namespace: default
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: jboxer
+  template:
+    metadata:
+      labels:
+        app: jboxer
+    spec:
+      volumes:
+      - name: key-volume
+        secret:
+          secretName: keyfile
+
+      containers:
+      - name: jboxer
+        image: sashosot/wildfly:14.0
+        
+        env:
+          - name: WILDFLY_USER
+            valueFrom:
+              secretKeyRef:
+                name: logtext
+                key: username
+          - name: WILDFLY_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: logtext
+                key: password
+        
+        ports:
+        - containerPort: 80
+                  
+        - containerPort: 443
+                 
+
+        readinessProbe:
+          failureThreshold: 4
+          httpGet:
+            httpHeaders:
+            - name: Host
+              value: localhost
+            path: /console/index.html
+            port: 9990
+            scheme: HTTP
+          initialDelaySeconds: 5
+          periodSeconds: 3
+          successThreshold: 1
+          timeoutSeconds: 10
+
+        
