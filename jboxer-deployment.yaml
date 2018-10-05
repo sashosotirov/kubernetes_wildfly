@@ -19,11 +19,12 @@ spec:
       - name: key-volume
         secret:
           secretName: keyfile
-
       containers:
       - name: jboxer
         image: sashosot/wildfly:14.0
-        
+        volumeMounts:
+        - name: key-volume
+          mountPath: /opt/certificates/
         env:
           - name: WILDFLY_USER
             valueFrom:
@@ -34,24 +35,26 @@ spec:
             valueFrom:
               secretKeyRef:
                 name: logtext
-                key: password
-        
-        ports:
-        - containerPort: 80
-                         
-        - containerPort: 443
-          
-                       
-
+                key: password        
+        ports:        
+        - containerPort: 8080
+          name: http
+          protocol: TCP
+        - containerPort: 8443
+          name: https
+          protocol: TCP 
         readinessProbe:
-          failureThreshold: 6
+          failureThreshold: 2
           httpGet:
-            path: /console/index.html
-            port: 9990
-            scheme: HTTP
-          initialDelaySeconds: 30
+            httpHeaders:
+            - name: Host
+              value: localhost
+            path: /
+            port: https
+            scheme: HTTPS
+          initialDelaySeconds: 5
           periodSeconds: 3
           successThreshold: 1
-          timeoutSeconds: 1
+          timeoutSeconds: 10
 
         
